@@ -84,6 +84,7 @@ function handleSquareClick(row, col) {
             col
         };
         square.element.classList.add("selected");
+        highlightLegalMoves(row, col);
     }
 }
 
@@ -94,8 +95,20 @@ function isCurrentPlayerPiece(piece) {
 
 function clearSelection() {
     board.forEach((row) =>
-        row.forEach((square) => square.element.classList.remove("selected"))
+        row.forEach((square) => {
+            square.element.classList.remove("selected", "highlight");
+        })
     );
+}
+
+function highlightLegalMoves(fromRow, fromCol) {
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (isValidMove(fromRow, fromCol, row, col)) {
+                board[row][col].element.classList.add("highlight");
+            }
+        }
+    }
 }
 
 function movePiece(fromRow, fromCol, toRow, toCol) {
@@ -104,7 +117,6 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
     board[fromRow][fromCol].piece = null;
     board[fromRow][fromCol].element.innerHTML = "";
 
-    // En passant capture
     if (movingPiece.toLowerCase() === 'p' && enPassantTarget && toRow === enPassantTarget.row && toCol === enPassantTarget.col) {
         const captureRow = currentPlayer === 'white' ? toRow + 1 : toRow - 1;
         board[captureRow][toCol].piece = null;
@@ -117,13 +129,11 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
     board[toRow][toCol].element.innerHTML = "";
     board[toRow][toCol].element.appendChild(icon);
 
-    // Add bounce animation if capturing opponent piece
     if (targetPiece && !isCurrentPlayerPiece(targetPiece)) {
         icon.classList.add('fa-bounce');
         setTimeout(() => icon.classList.remove('fa-bounce'), 800);
     }
 
-    // Update en passant target
     enPassantTarget = null;
     if (movingPiece.toLowerCase() === 'p' && Math.abs(fromRow - toRow) === 2) {
         enPassantTarget = {
@@ -137,7 +147,7 @@ function isValidMove(fromRow, fromCol, toRow, toCol) {
     const piece = board[fromRow][fromCol].piece;
     const targetPiece = board[toRow][toCol].piece;
     if (targetPiece && isCurrentPlayerPiece(targetPiece)) {
-        return false; // Prevent attacking own pieces
+        return false;
     }
 
     const rowDiff = Math.abs(toRow - fromRow);
