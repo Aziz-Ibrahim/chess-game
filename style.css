@@ -44,5 +44,16 @@ body {
 }
 
 .selected {
-    background-color: #a9a9a9;
+    background-color: aquamarine;
+}
+
+.highlight {
+    background-color: cadetblue;
+}
+
+@media screen(max-width 400px) {
+    #chessboard {
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+    }
 }
