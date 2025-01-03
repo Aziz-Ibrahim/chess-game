@@ -13,6 +13,8 @@ body {
 
 .wrapper {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #chessboard {
@@ -61,4 +63,36 @@ body {
 .highlight {
     background-color: cadetblue;
     border: aquamarine solid 2px;
+}
+
+
+/* Media query for mobile phones */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+
+    }
+
+    .wrapper {
+        flex-direction: column;
+    }
+
+    #chessboard {
+        width: 100%;
+        max-width: 360px;
+        grid-template-columns: repeat(8, 40px);
+        grid-template-rows: repeat(8, 40px);
+    }
+
+    .square {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .white-piece,
+    .black-piece {
+        font-size: 1.5rem;
+    }
+
 }
