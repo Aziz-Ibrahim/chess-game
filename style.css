@@ -1,3 +1,8 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -6,11 +11,17 @@ body {
     background-color: #f0f0f0;
 }
 
+.wrapper {
+    display: flex;
+}
+
 #chessboard {
+    align-self: center;
+    width: 480px;
     display: grid;
     grid-template-columns: repeat(8, 60px);
     grid-template-rows: repeat(8, 60px);
-    margin: 20px auto;
+    margin: auto;
     border: 2px solid #333;
 }
 
@@ -49,11 +60,5 @@ body {
 
 .highlight {
     background-color: cadetblue;
-}
-
-@media screen(max-width 400px) {
-    #chessboard {
-        grid-template-columns: repeat(8, 40px);
-        grid-template-rows: repeat(8, 40px);
-    }
+    border: aquamarine solid 2px;
 }
