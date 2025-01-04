@@ -13,16 +13,6 @@ let castlingRights = {
     }
 };
 let enPassantTarget = null;
-let kingPositions = {
-    white: {
-        row: 7,
-        col: 4
-    },
-    black: {
-        row: 0,
-        col: 4
-    }
-};
 
 const initialSetup = [
     ["r", "n", "b", "q", "k", "b", "n", "r"],
@@ -85,12 +75,6 @@ function handleSquareClick(row, col) {
         if (isValidMove(selectedRow, selectedCol, row, col)) {
             movePiece(selectedRow, selectedCol, row, col);
             currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-            if (isCheck(currentPlayer)) {
-                alert(`${currentPlayer} is in check!`);
-            }
-            if (isCheckmate(currentPlayer)) {
-                alert(`${currentPlayer} is in checkmate! Game over.`);
-            }
         }
         selectedSquare = null;
         clearSelection();
@@ -133,11 +117,10 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
     board[fromRow][fromCol].piece = null;
     board[fromRow][fromCol].element.innerHTML = "";
 
-    if (movingPiece && movingPiece.toLowerCase() === 'k') {
-        kingPositions[currentPlayer] = {
-            row: toRow,
-            col: toCol
-        };
+    if (movingPiece.toLowerCase() === 'p' && enPassantTarget && toRow === enPassantTarget.row && toCol === enPassantTarget.col) {
+        const captureRow = currentPlayer === 'white' ? toRow + 1 : toRow - 1;
+        board[captureRow][toCol].piece = null;
+        board[captureRow][toCol].element.innerHTML = "";
     }
 
     board[toRow][toCol].piece = movingPiece;
@@ -150,47 +133,54 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
         icon.classList.add('fa-bounce');
         setTimeout(() => icon.classList.remove('fa-bounce'), 800);
     }
-}
 
-function isValidMove() {
-    return true; // Temporary placeholder for debugging
-}
-
-function isCheck(player) {
-    const kingPos = kingPositions[player];
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const piece = board[row][col].piece;
-            if (piece && isCurrentPlayerPiece(piece) !== (player === 'white')) {
-                if (isValidMove(row, col, kingPos.row, kingPos.col)) {
-                    return true;
-                }
-            }
-        }
+    enPassantTarget = null;
+    if (movingPiece.toLowerCase() === 'p' && Math.abs(fromRow - toRow) === 2) {
+        enPassantTarget = {
+            row: (fromRow + toRow) / 2,
+            col: fromCol
+        };
     }
-    return false;
 }
 
-function isCheckmate(player) {
-    if (!isCheck(player)) return false;
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const piece = board[row][col].piece;
-            if (piece && isCurrentPlayerPiece(piece) === (player === 'white')) {
-                for (let newRow = 0; newRow < 8; newRow++) {
-                    for (let newCol = 0; newCol < 8; newCol++) {
-                        const tempPiece = board[newRow][newCol].piece;
-                        movePiece(row, col, newRow, newCol);
-                        const inCheck = isCheck(player);
-                        movePiece(newRow, newCol, row, col);
-                        board[newRow][newCol].piece = tempPiece;
-                        if (!inCheck) return false;
-                    }
-                }
-            }
-        }
+function isValidMove(fromRow, fromCol, toRow, toCol) {
+    const piece = board[fromRow][fromCol].piece;
+    const targetPiece = board[toRow][toCol].piece;
+    if (targetPiece && isCurrentPlayerPiece(targetPiece)) {
+        return false;
     }
-    return true;
+
+    const rowDiff = Math.abs(toRow - fromRow);
+    const colDiff = Math.abs(toCol - fromCol);
+
+    switch (piece.toLowerCase()) {
+        case 'p':
+            const direction = piece === 'P' ? -1 : 1;
+            const startRow = piece === 'P' ? 6 : 1;
+            if (colDiff === 0 && !targetPiece) {
+                if (toRow - fromRow === direction) return true;
+                if (fromRow === startRow && toRow - fromRow === 2 * direction && !board[fromRow + direction][fromCol].piece) return true;
+            }
+            if (colDiff === 1 && rowDiff === 1 && targetPiece && !isCurrentPlayerPiece(targetPiece)) {
+                return true;
+            }
+            if (colDiff === 1 && rowDiff === 1 && enPassantTarget && enPassantTarget.row === toRow && enPassantTarget.col === toCol) {
+                return true;
+            }
+            return false;
+        case 'r':
+            return fromRow === toRow || fromCol === toCol;
+        case 'n':
+            return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+        case 'b':
+            return rowDiff === colDiff;
+        case 'q':
+            return rowDiff === colDiff || fromRow === toRow || fromCol === toCol;
+        case 'k':
+            return rowDiff <= 1 && colDiff <= 1;
+        default:
+            return false;
+    }
 }
 
 initializeBoard();
